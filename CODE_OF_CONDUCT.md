@@ -38,7 +38,7 @@ inappropriate, threatening, offensive, or harmful.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
-community leaders responsible for enforcement at **conduct@agent-experience.dev**. All
+community leaders responsible for enforcement at **therealtmac33@gmail.com**. All
 complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution

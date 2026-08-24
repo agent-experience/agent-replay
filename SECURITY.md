@@ -24,5 +24,5 @@ later release.
 ## Reporting a vulnerability
 
 If you discover a security issue, please **do not open a public issue**. Instead, email the
-maintainers at **security@agent-experience.dev** with a description and reproduction steps.
+maintainers at **therealtmac33@gmail.com** with a description and reproduction steps.
 We'll acknowledge within a few business days and keep you updated on a fix.
