@@ -429,19 +429,19 @@ with trace("research-agent", task="Find latest pricing"):
 
 Phase 1 is complete when:
 
-- [ ] `pip install agent-replay` works;
-- [ ] a developer can run the minimal example in under 5 minutes;
-- [ ] a local SQLite trace store is generated;
-- [ ] `agent-replay list` lists previous runs;
-- [ ] `agent-replay show latest` displays a timeline;
-- [ ] LLM calls, tool calls, retrieval events, and memory events can be recorded;
-- [ ] traces can be exported as JSON;
-- [ ] traces can be exported in an OpenTelemetry-compatible format;
-- [ ] at least three failure examples are runnable;
-- [ ] the README clearly communicates “Time-travel debugging for AI agents” in the first screen;
-- [ ] `docs/research.md` contains key papers and standards;
-- [ ] all examples run in CI;
-- [ ] no hosted service is required.
+- [x] `pip install agent-replay` works;
+- [x] a developer can run the minimal example in under 5 minutes;
+- [x] a local SQLite trace store is generated;
+- [x] `agent-replay list` lists previous runs;
+- [x] `agent-replay show latest` displays a timeline;
+- [x] LLM calls, tool calls, retrieval events, and memory events can be recorded;
+- [x] traces can be exported as JSON;
+- [x] traces can be exported in an OpenTelemetry-compatible format;
+- [x] at least three failure examples are runnable;
+- [x] the README clearly communicates “Time-travel debugging for AI agents” in the first screen;
+- [x] `docs/research.md` contains key papers and standards;
+- [x] all examples run in CI;
+- [x] no hosted service is required.
 
 ---
 

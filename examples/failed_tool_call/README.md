@@ -6,8 +6,9 @@ schema. The tool returns `{"error": "field refund_status is deprecated"}`.
 ```bash
 python examples/failed_tool_call/main.py
 agent-replay show latest
+agent-replay analyze latest   # names the failure and suggests a replay point
 ```
 
 What to look for: the `tool_call` step's `input` contains `refund_status`, and its `error`
 line (shown in red) reveals the schema mismatch. This is the `hallucinated_tool_argument`
-failure mode that the Phase 2 `analyze` command will detect automatically.
+failure mode, which `agent-replay analyze` detects automatically.
