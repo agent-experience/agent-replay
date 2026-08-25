@@ -40,7 +40,11 @@ jobs:
           python examples/failed_tool_call/main.py
           python examples/bad_retrieval/main.py
           python examples/ignored_tool_result/main.py
+          python examples/failure_gallery/main.py
           agent-replay list
           agent-replay show latest
           agent-replay export latest --format json > /dev/null
           agent-replay export latest --format otlp > /dev/null
+          agent-replay analyze latest --format json > /dev/null
+          agent-replay stats > /dev/null
+          agent-replay sanitize latest > /dev/null

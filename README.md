@@ -69,6 +69,54 @@ python examples/ignored_tool_result/main.py     # tool error ignored by the agen
 agent-replay show latest
 ```
 
+## Find why your agent failed
+
+Once a run is recorded, ask Agent Replay what went wrong:
+
+```bash
+agent-replay analyze latest
+```
+
+```text
+support-agent  run_49fea4df07cc  success
+Close ticket T-9
+
+Likely root cause:
+  • Tool 'ticketing.update' returned an error but the agent continued and treated
+    the run as successful. (tool_call_1) — ignored_tool_result, confidence 0.70
+  • Final answer claims success, but an earlier tool observation was an error
+    (from tool_call_1). (llm_call_2) — final_answer_conflict, confidence 0.70
+
+Suggested replay point: before tool_call_1
+Severity: high   Confidence: 0.70
+```
+
+The run *reported* success — it never raised — yet Agent Replay flags why it actually failed.
+
+Analysis runs ten built-in **deterministic detectors** over the recorded trace — no model
+calls required — covering the failure taxonomy (hallucinated tool arguments, ignored tool
+results, bad retrieval, stale memory, context pollution, excessive retries, loops, unsafe
+writes, permission mismatches, final-answer conflicts). Two optional **LLM-assisted
+detectors** (`LLMFailureClassifier`, `LLMRootCauseDetector`) plug in a model of your choice.
+
+```bash
+agent-replay analyze latest --format json     # machine-readable eval report
+agent-replay stats                            # failure statistics across all runs
+agent-replay analyze latest --plugin my_detectors   # add your own detectors
+```
+
+Write a custom detector in a few lines:
+
+```python
+from agent_replay.analysis import register_detector, Finding, taxonomy
+
+@register_detector("my_check")
+def my_check(run, steps):
+    if run.cost_usd and run.cost_usd > 1.0:
+        return [Finding(taxonomy.EXCESSIVE_RETRY, "my_check", "Run was unusually expensive.")]
+    return []
+```
+
 ## What Agent Replay records
 
 | Event | Recorder |
@@ -89,6 +137,10 @@ trace can contain prompts, tool results, PII, and secrets. Controls:
 - `AGENT_REPLAY_METADATA_ONLY=1` — record step structure but drop body payloads.
 - `AGENT_REPLAY_CAPTURE_BODIES=0` — same effect.
 - `trace(..., redact=fn)` — pass a hook to scrub sensitive fields before they are stored.
+- `.agent-replayignore` — list key glob patterns (e.g. `*password*`, `authorization`); matching
+  fields are redacted at any depth when recorded.
+- `agent-replay sanitize latest` — export a run with secret-bearing fields scrubbed, safe to
+  attach to a bug report.
 
 See [`SECURITY.md`](SECURITY.md) before sharing a trace.
 
@@ -96,17 +148,17 @@ See [`SECURITY.md`](SECURITY.md) before sharing a trace.
 
 Agent Replay ships in phases (see [`docs/whitepaper.md`](docs/whitepaper.md)):
 
-1. **Trace + Replay** — record traces, inspect, playback. *(this release, Phase 1)*
-2. **Failure Analysis + Eval** — detectors and explainable failure reports.
+1. **Trace + Replay** — record traces, inspect, playback. *(shipped)*
+2. **Failure Analysis + Eval** — detectors and explainable failure reports. *(this release, Phase 2)*
 3. **Checkpoint + Fork** — fork a run from any step and diff branches.
 4. **Experience Memory** — turn past runs into reusable, retrievable lessons.
 
-## Non-goals (Phase 1)
+## Non-goals (Phases 1–2)
 
-Agent Replay is deliberately narrow to start. Phase 1 does **not** re-execute side-effectful
-tools, do automatic root-cause analysis, provide checkpoint/fork, ship a hosted dashboard,
-or attempt OS-level deterministic replay. It implements **semantic replay** for agents, not
-byte-level record/replay.
+Agent Replay is deliberately narrow to start. It does **not** re-execute side-effectful
+tools, provide checkpoint/fork, ship a hosted dashboard, or attempt OS-level deterministic
+replay. It implements **semantic replay** for agents, not byte-level record/replay, and its
+failure detectors surface *signals to confirm*, not proofs.
 
 ## Research grounding
 
