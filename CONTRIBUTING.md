@@ -30,8 +30,8 @@ pytest              # full test suite (includes running the examples)
 ## Scope
 
 Please keep PRs aligned with the current phase (see the roadmap in
-[`docs/whitepaper.md`](docs/whitepaper.md)). Phase 1 is trace + playback replay; failure
-analysis, fork, and experience memory come later.
+[`docs/whitepaper.md`](docs/whitepaper.md)). Phase 1 (trace + playback replay) and Phase 2
+(failure analysis + eval) have shipped; checkpoint/fork and experience memory come later.
 
 ## Reporting bugs with a trace
 
