@@ -9,6 +9,7 @@ Commands:
 
 from __future__ import annotations
 
+import importlib
 import json as _json
 
 import typer
@@ -16,7 +17,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.tree import Tree
 
+from ..analysis import aggregate, analyze
 from ..exporters import export_run, export_run_otlp
+from ..redaction import DEFAULT_SECRET_PATTERNS, load_ignore_patterns, scrub
 from ..replay import PlaybackReplay
 from ..schema import (
     LLM_CALL,
@@ -34,6 +37,10 @@ console = Console()
 
 _DB_OPTION = typer.Option(
     None, "--db", help="Path to the trace store (default: env / ~/.agent-replay/traces.db)."
+)
+
+_OUTPUT_OPTION = typer.Option(
+    None, "--output", "-o", help="Write to file instead of stdout."
 )
 
 _TYPE_STYLE = {
@@ -194,6 +201,122 @@ def export(
         console.print(f"[green]Wrote {fmt} export to {output}[/green]")
     else:
         # Plain stdout (no rich markup) so the output is pipeable.
+        print(text)
+
+
+_SEVERITY_STYLE = {"high": "red", "medium": "yellow", "low": "cyan"}
+
+_PLUGIN_OPTION = typer.Option(
+    None, "--plugin", help="Import a module that registers custom detectors (repeatable)."
+)
+
+
+@app.command("analyze")
+def analyze_cmd(
+    run: str = typer.Argument("latest", help="Run id, or 'latest'."),
+    format: str = typer.Option("text", "--format", "-f", help="text | json"),
+    plugin: list[str] = _PLUGIN_OPTION,
+    output: str | None = typer.Option(None, "--output", "-o", help="Write JSON to a file."),
+    db: str | None = _DB_OPTION,
+) -> None:
+    """Analyze a run for likely failures and print an explainable report."""
+    for mod in plugin or []:
+        importlib.import_module(mod)
+    store = Store(db)
+    run_obj = _resolve_run(store, run)
+    steps = store.get_steps(run_obj.run_id)
+    report = analyze(run_obj, steps)
+
+    if format.lower() == "json":
+        text = _json.dumps(report.to_dict(), indent=2, default=str)
+        if output:
+            with open(output, "w", encoding="utf-8") as fh:
+                fh.write(text)
+            console.print(f"[green]Wrote analysis to {output}[/green]")
+        else:
+            print(text)
+        return
+
+    console.print(_run_header(run_obj))
+    if report.success or not report.findings:
+        console.print("\n[green]No failures detected.[/green]")
+        return
+    console.print("\n[bold]Likely root cause:[/bold]")
+    for f in report.findings:
+        style = _SEVERITY_STYLE.get(f.severity or "", "white")
+        loc = f" [dim]({f.step_id})[/dim]" if f.step_id else ""
+        console.print(
+            f"  [{style}]•[/{style}] {f.message}{loc} "
+            f"[dim]— {f.failure_type}, confidence {f.confidence:.2f}[/dim]"
+        )
+    if report.suggested_replay_step:
+        console.print(
+            f"\n[bold]Suggested replay point:[/bold] before {report.suggested_replay_step}"
+        )
+    sev_style = _SEVERITY_STYLE.get(report.severity, "white")
+    console.print(
+        f"[bold]Severity:[/bold] [{sev_style}]{report.severity}[/{sev_style}]   "
+        f"[bold]Confidence:[/bold] {report.confidence:.2f}"
+    )
+
+
+@app.command("stats")
+def stats_cmd(
+    limit: int = typer.Option(200, "--limit", "-n", help="Max number of runs to analyze."),
+    format: str = typer.Option("text", "--format", "-f", help="text | json"),
+    db: str | None = _DB_OPTION,
+) -> None:
+    """Aggregate failure statistics across recorded runs."""
+    store = Store(db)
+    runs = store.list_runs(limit=limit)
+    reports = [analyze(r, store.get_steps(r.run_id)) for r in runs]
+    agg = aggregate(reports)
+
+    if format.lower() == "json":
+        print(_json.dumps(agg, indent=2, default=str))
+        return
+
+    console.print(
+        f"[bold]{agg['total_runs']}[/bold] runs   "
+        f"[green]{agg['successful_runs']} ok[/green]   "
+        f"[red]{agg['failed_runs']} flagged[/red]   "
+        f"success rate [bold]{agg['success_rate'] * 100:.0f}%[/bold]"
+    )
+    counts = agg["failure_type_counts"]
+    if not counts:
+        console.print("[dim]No failures detected across these runs.[/dim]")
+        return
+    table = Table(title="Failure types")
+    table.add_column("failure_type")
+    table.add_column("runs", justify="right")
+    for ftype, count in counts.items():
+        table.add_row(ftype, str(count))
+    console.print(table)
+
+
+@app.command("sanitize")
+def sanitize_cmd(
+    run: str = typer.Argument("latest", help="Run id, or 'latest'."),
+    output: str | None = _OUTPUT_OPTION,
+    db: str | None = _DB_OPTION,
+) -> None:
+    """Export a run as JSON with secret-bearing fields scrubbed (safe to share)."""
+    store = Store(db)
+    run_obj = _resolve_run(store, run)
+    steps = store.get_steps(run_obj.run_id)
+    patterns = tuple(dict.fromkeys([*DEFAULT_SECRET_PATTERNS, *load_ignore_patterns()]))
+    for step in steps:
+        step.input = scrub(step.input, patterns)
+        step.output = scrub(step.output, patterns)
+        step.state_before = scrub(step.state_before, patterns)
+        step.state_after = scrub(step.state_after, patterns)
+    payload = export_run(run_obj, steps)
+    text = _json.dumps(payload, indent=2, default=str)
+    if output:
+        with open(output, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        console.print(f"[green]Wrote sanitized export to {output}[/green]")
+    else:
         print(text)
 
 

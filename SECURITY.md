@@ -16,10 +16,20 @@ hosted service and no telemetry back to the project.
 - `AGENT_REPLAY_CAPTURE_BODIES=0` — same effect as metadata-only.
 - `trace(..., redact=fn)` — pass a hook that receives the sensitive fields
   (`input`, `output`, `state_before`, `state_after`) and returns a scrubbed copy.
+- `.agent-replayignore` — a file (in the current directory or `AGENT_REPLAY_HOME`) listing key
+  glob patterns, one per line (e.g. `*password*`, `*token*`, `authorization`). Matching fields
+  are redacted at any depth as steps are recorded.
 
 **Always sanitize a trace before sharing it** in a bug report or exporting it to another
-system. A standalone `sanitize` command and `.agent-replayignore` support are planned for a
-later release.
+system:
+
+```bash
+agent-replay sanitize latest -o run.sanitized.json
+```
+
+`sanitize` scrubs common secret-bearing fields (passwords, tokens, API keys, credentials) plus
+anything matched by your `.agent-replayignore`, and writes a JSON export that is safe to
+attach to an issue.
 
 ## Reporting a vulnerability
 

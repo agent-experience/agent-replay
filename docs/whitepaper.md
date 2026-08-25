@@ -503,16 +503,18 @@ Example:
 
 ### 8.4 Phase 2 Acceptance Criteria
 
-- [ ] At least five deterministic detectors are implemented;
-- [ ] at least two LLM-assisted detector interfaces are implemented;
-- [ ] `agent-replay analyze <run_id>` generates a failure report;
-- [ ] the report includes likely root cause, evidence, and suggested replay point;
-- [ ] every detector has unit tests;
-- [ ] every failure type has an example trace;
-- [ ] custom user-defined detectors are supported;
-- [ ] analysis results can be exported as JSON;
-- [ ] multiple runs can be aggregated for failure statistics;
-- [ ] README includes a “Find why your agent failed” demo.
+- [x] At least five deterministic detectors are implemented; *(ten, covering the full taxonomy)*
+- [x] at least two LLM-assisted detector interfaces are implemented;
+- [x] `agent-replay analyze <run_id>` generates a failure report;
+- [x] the report includes likely root cause, evidence, and suggested replay point;
+- [x] every detector has unit tests;
+- [x] every failure type has an example trace; *(`examples/failure_gallery`)*
+- [x] custom user-defined detectors are supported; *(`register_detector` + `--plugin`)*
+- [x] analysis results can be exported as JSON; *(`analyze --format json`)*
+- [x] multiple runs can be aggregated for failure statistics; *(`agent-replay stats`)*
+- [x] README includes a “Find why your agent failed” demo;
+- [x] `.agent-replayignore` is supported (deferred from Phase 1);
+- [x] a `sanitize` command is available before export (deferred from Phase 1).
 
 ---
 
@@ -971,8 +973,8 @@ Acceptance:
 - [ ] prompt/body capture can be disabled;
 - [ ] metadata-only mode is supported;
 - [ ] documentation warns that traces may contain prompts, tool results, PII, and secrets;
-- [ ] `.agent-replayignore` is supported;
-- [ ] sanitize command is available before export;
+- [ ] `.agent-replayignore` is supported; *(Phase 2 — see §8.4)*
+- [ ] sanitize command is available before export; *(Phase 2 — see §8.4)*
 - [ ] side-effect replay requires explicit confirmation.
 
 ### 15.4 Research Grounding Acceptance
