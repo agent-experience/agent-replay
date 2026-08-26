@@ -1,0 +1,40 @@
+{
+  "name": "@agent-replay/record",
+  "version": "0.1.0",
+  "description": "TypeScript recorder for Agent Replay — instrument a TS/JS agent and produce a trace the Python agent-replay tool can analyze.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "example": "node --experimental-strip-types examples/react-agent/run.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "keywords": [
+    "agent-replay",
+    "agents",
+    "observability",
+    "tracing",
+    "debugging",
+    "llm"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "^5.4.0"
+  }
+}

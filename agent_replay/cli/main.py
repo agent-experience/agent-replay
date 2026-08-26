@@ -5,12 +5,14 @@ Commands:
   show   <run_id|latest>     render a run's timeline
   replay <run_id|latest>     playback the run (no external calls)
   export <run_id|latest>     export a run as JSON or OTLP/JSON
+  import <file|->            import a JSON trace recorded elsewhere (e.g. a TypeScript agent)
 """
 
 from __future__ import annotations
 
 import importlib
 import json as _json
+import sys
 
 import typer
 from rich.console import Console
@@ -26,6 +28,7 @@ from ..schema import (
     MEMORY_READ,
     MEMORY_WRITE,
     RETRIEVAL,
+    STEP_TYPES,
     TOOL_CALL,
     Run,
     Step,
@@ -202,6 +205,73 @@ def export(
     else:
         # Plain stdout (no rich markup) so the output is pipeable.
         print(text)
+
+
+def _ingest_trace(store: Store, payload: dict, *, overwrite: bool) -> tuple[str, int]:
+    """Insert one exported-trace dict ({run, steps}) into the store. Returns (run_id, n_steps)."""
+    if not isinstance(payload, dict) or "run" not in payload:
+        raise ValueError("expected an object with a 'run' key (the `export --format json` shape)")
+    run = Run.from_dict(payload["run"])
+    steps = [Step.from_dict(s) for s in payload.get("steps", [])]
+    for step in steps:
+        if step.type not in STEP_TYPES:
+            raise ValueError(f"step '{step.step_id}' has unknown type '{step.type}'")
+        step.run_id = run.run_id  # keep steps bound to their run even if the source disagreed
+
+    if store.get_run(run.run_id) is not None:
+        if not overwrite:
+            raise FileExistsError(
+                f"run {run.run_id} already exists (use --overwrite to replace it)"
+            )
+        store.delete_run(run.run_id)
+
+    store.insert_run(run)
+    for step in steps:
+        store.insert_step(step)
+    return run.run_id, len(steps)
+
+
+@app.command("import")
+def import_cmd(
+    file: str = typer.Argument(..., help="Path to a JSON trace, or '-' to read stdin."),
+    overwrite: bool = typer.Option(
+        False, "--overwrite", "-f", help="Replace a run that already exists (instead of erroring)."
+    ),
+    db: str | None = _DB_OPTION,
+) -> None:
+    """Import a trace recorded elsewhere (e.g. a TypeScript agent) into the local store.
+
+    Accepts the `export --format json` shape — a single {run, steps} object, or a list of them
+    for bulk import. Once imported, every command (show / analyze / replay / stats) works on it.
+    """
+    raw = sys.stdin.read() if file == "-" else _read_file(file)
+    try:
+        data = _json.loads(raw)
+    except _json.JSONDecodeError as exc:
+        console.print(f"[red]Not valid JSON: {exc}[/red]")
+        raise typer.Exit(2) from exc
+
+    traces = data if isinstance(data, list) else [data]
+    store = Store(db)
+    imported = 0
+    for payload in traces:
+        try:
+            run_id, n_steps = _ingest_trace(store, payload, overwrite=overwrite)
+        except (ValueError, FileExistsError) as exc:
+            console.print(f"[red]Import failed: {exc}[/red]")
+            raise typer.Exit(1) from exc
+        console.print(f"[green]Imported {run_id}[/green] ({n_steps} steps)")
+        imported += 1
+    console.print(f"[dim]Imported {imported} run(s) into {store.db_path}[/dim]")
+
+
+def _read_file(path: str) -> str:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except OSError as exc:
+        console.print(f"[red]Cannot read {path}: {exc}[/red]")
+        raise typer.Exit(2) from exc
 
 
 _SEVERITY_STYLE = {"high": "red", "medium": "yellow", "low": "cyan"}
