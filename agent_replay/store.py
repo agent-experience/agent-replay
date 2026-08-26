@@ -143,6 +143,13 @@ class Store:
                 ),
             )
 
+    def delete_run(self, run_id: str) -> None:
+        """Remove a run and all its steps. Used by ``import --overwrite`` to replace a run
+        cleanly instead of appending duplicate steps."""
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM steps WHERE run_id = ?", (run_id,))
+            self._conn.execute("DELETE FROM runs WHERE run_id = ?", (run_id,))
+
     # -- reads ------------------------------------------------------------------
     def _row_to_run(self, row: sqlite3.Row) -> Run:
         return Run(

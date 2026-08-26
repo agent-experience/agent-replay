@@ -129,6 +129,36 @@ def my_check(run, steps):
 Every run has a `run_id`, every step a `step_id`, and the trace schema is versioned
 (`SCHEMA_VERSION`) and forward-compatible.
 
+## Record from TypeScript (or any language)
+
+The analysis engine works on a **language-neutral JSON trace**, so your agent doesn't have to
+be written in Python. Emit a trace in the canonical format, then hand it to the CLI:
+
+```bash
+agent-replay import trace.json      # load a trace produced anywhere
+agent-replay analyze latest         # same detectors, same report
+```
+
+`import` is the mirror of `export --format json` — it round-trips exactly, accepts a single
+trace or a JSON array of traces, reads from stdin (`agent-replay import -`), and takes
+`--overwrite` to replace a run by id.
+
+For **TypeScript / JavaScript** agents, use the official recorder
+[`@agent-replay/record`](sdks/typescript) — a tiny, zero-dependency SDK that produces exactly
+this format:
+
+```ts
+import { trace } from "@agent-replay/record";
+
+await trace({ agent: "research-agent", task, out: "trace.json" }, async (run) => {
+  run.llmCall({ provider: "anthropic", model, inputMessages, outputMessage });
+  run.toolCall({ name, input, output, error });
+});
+```
+
+Then `agent-replay import trace.json && agent-replay analyze latest`. See the
+[TypeScript SDK README](sdks/typescript) for the full quickstart and a runnable example.
+
 ## Privacy
 
 Agent Replay is **local-first**: traces are written to disk and **never uploaded**. But a
@@ -149,7 +179,9 @@ See [`SECURITY.md`](SECURITY.md) before sharing a trace.
 Agent Replay ships in phases (see [`docs/whitepaper.md`](docs/whitepaper.md)):
 
 1. **Trace + Replay** — record traces, inspect, playback. *(shipped)*
-2. **Failure Analysis + Eval** — detectors and explainable failure reports. *(this release, Phase 2)*
+2. **Failure Analysis + Eval** — detectors and explainable failure reports, plus a
+   language-neutral `import` boundary and a [TypeScript recorder SDK](sdks/typescript).
+   *(this release, Phase 2)*
 3. **Checkpoint + Fork** — fork a run from any step and diff branches.
 4. **Experience Memory** — turn past runs into reusable, retrievable lessons.
 
