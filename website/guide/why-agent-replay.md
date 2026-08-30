@@ -44,3 +44,5 @@ Traces are stored in a local SQLite database. Nothing is uploaded anywhere. No a
 | **Privacy** | Built-in redaction, metadata-only mode | Varies |
 
 Agent Replay is not a replacement for production observability. It's a debugging tool that answers the question your observability platform can't: **why did my agent make that decision?**
+
+For a detailed feature-by-feature breakdown, see [Langfuse vs LangSmith vs Agent Replay](/compare).
