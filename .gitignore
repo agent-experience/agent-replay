@@ -21,6 +21,11 @@ htmlcov/
 *.agent-replay.db
 traces.db
 
+# Node / VitePress
+node_modules/
+website/.vitepress/dist/
+website/.vitepress/cache/
+
 # OS / editor
 .DS_Store
 .idea/
