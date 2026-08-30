@@ -16,7 +16,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'Failure Patterns', link: '/failure-patterns' },
+      { text: '10 Failure Patterns', link: '/failure-patterns' },
       { text: 'API', link: '/api/python-sdk' },
       { text: 'GitHub', link: 'https://github.com/agent-experience/agent-replay' }
     ],
@@ -40,7 +40,7 @@ export default defineConfig({
       {
         text: 'References',
         items: [
-          { text: '10 Agent Failure Patterns', link: '/failure-patterns' },
+          { text: '10 AI Agent Failure Patterns', link: '/failure-patterns' },
           { text: 'Python SDK', link: '/api/python-sdk' },
           { text: 'TypeScript SDK', link: '/api/typescript-sdk' },
           { text: 'CLI Reference', link: '/api/cli' },
