@@ -10,6 +10,7 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'Record, replay, and analyze AI agent execution traces. Local-first, open-source, with built-in failure detection.' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'msvalidate.01', content: 'E9DCBEEB64460072E006B908DC5673DE' }],
   ],
   cleanUrls: true,
   themeConfig: {
