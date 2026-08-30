@@ -34,6 +34,7 @@ export default defineConfig({
       {
         text: 'Core Concepts',
         items: [
+          { text: 'What is Agent Observability?', link: '/guide/ai-agent-observability' },
           { text: 'Trace Schema', link: '/guide/trace-schema' },
           { text: 'Failure Analysis', link: '/guide/failure-analysis' },
           { text: 'Privacy & Redaction', link: '/guide/privacy' },
@@ -46,6 +47,12 @@ export default defineConfig({
           { text: 'Python SDK', link: '/api/python-sdk' },
           { text: 'TypeScript SDK', link: '/api/typescript-sdk' },
           { text: 'CLI Reference', link: '/api/cli' },
+        ]
+      },
+      {
+        text: '中文',
+        items: [
+          { text: 'AI Agent 调试工具指南', link: '/zh/agent-debugging-tools' },
         ]
       }
     ],
