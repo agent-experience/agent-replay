@@ -17,6 +17,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: '10 Failure Patterns', link: '/failure-patterns' },
+      { text: 'Compare', link: '/compare' },
       { text: 'API', link: '/api/python-sdk' },
       { text: 'GitHub', link: 'https://github.com/agent-experience/agent-replay' }
     ],
@@ -27,6 +28,7 @@ export default defineConfig({
           { text: 'What is Agent Replay?', link: '/' },
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Why Agent Replay?', link: '/guide/why-agent-replay' },
+          { text: 'Langfuse vs LangSmith vs Agent Replay', link: '/compare' },
         ]
       },
       {
