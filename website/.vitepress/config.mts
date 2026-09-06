@@ -68,6 +68,6 @@ export default defineConfig({
     }
   },
   sitemap: {
-    hostname: 'https://agent-experience.github.io/agent-replay'
+    hostname: 'https://agent-experience.github.io/agent-replay/'
   }
 })
