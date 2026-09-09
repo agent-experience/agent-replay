@@ -16,6 +16,8 @@ Traces stay on your machine. No account, no hosted service, no data leaves your 
 record → inspect → replay → fork → learn
 ```
 
+**[Documentation](https://agent-experience.github.io/agent-replay/)** · **[10 Failure Patterns](https://agent-experience.github.io/agent-replay/failure-patterns)** · **[Compare with Langfuse & LangSmith](https://agent-experience.github.io/agent-replay/compare)**
+
 ## Install
 
 ```bash
@@ -199,6 +201,14 @@ Agent Replay builds on ReAct (reasoning + acting traces), agent evaluation work
 long-term memory (Generative Agents, MemGPT), OpenTelemetry's GenAI semantic conventions,
 and the systems record/replay tradition (rr, CRIU, Firecracker). See
 [`docs/research.md`](docs/research.md).
+
+## Links
+
+- [Documentation](https://agent-experience.github.io/agent-replay/)
+- [Getting Started](https://agent-experience.github.io/agent-replay/guide/getting-started)
+- [10 AI Agent Failure Patterns](https://agent-experience.github.io/agent-replay/failure-patterns)
+- [Langfuse vs LangSmith vs Agent Replay](https://agent-experience.github.io/agent-replay/compare)
+- [AI Agent 调试工具指南](https://agent-experience.github.io/agent-replay/zh/agent-debugging-tools)
 
 ## License
 
